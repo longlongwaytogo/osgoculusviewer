@@ -1,0 +1,21 @@
+OculusSDK doesn't support VisualStudio 8 / 2005, but it's possible to graft in support with the following steps:
+
+ 1) Apply hotfix to VS2005
+
+ 2) Copy the osgoculusviewer/PlatformSpicifics/VS2005/LibOVR/Include/OVR_CAPI_GL.h to the OculusSDK/LibOVR/Include
+
+ 3) Place stdint.h and dwmapi.h into one of the following directories if they aren't already available:
+ 
+    C:/Microsoft Visual Studio 8/VC/crt/src/
+    C:/Program Files (x86)/Microsoft Visual Studio 8/VC/include/
+    
+    Open source copies of stdint.h can be found on the internet, or if you have later versions of VisualStudio installed
+    stdint.h and dwmapi.h can be found at:
+        
+    C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/crt/src/stdint.h
+    C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/include/stdint.h
+
+    C:/Program Files (x86)/Windows Kits/8.0/Include/um/dwmapi.h
+    C:/Program Files (x86)/Windows Kits/8.1/Include/um/dwmapi.h
+    C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Include/dwmapi.h
+
