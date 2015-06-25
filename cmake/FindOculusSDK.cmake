@@ -47,7 +47,8 @@ ENDIF()
 IF (MSVC)
 	# Visual Studio 2005
 	IF(MSVC80)
-		SET(_OCULUS_MSVC_DIR "VS2005")
+                # OCULUS_SDK doesn't have support for VS2005, so use the next best solution
+		SET(_OCULUS_MSVC_DIR "VS2010")
 	ENDIF()
 	# Visual Studio 2010
 	IF(MSVC10)
