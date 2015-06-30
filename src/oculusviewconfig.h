@@ -37,7 +37,7 @@ class OculusViewConfig : public osgViewer::ViewConfig {
 		osg::ref_ptr<OculusHealthAndSafetyWarning> m_warning;
 };
 
-
+#if 0
 class OculusViewConfigOrientationCallback :  public osg::NodeCallback {
 	public:
 		OculusViewConfigOrientationCallback(osg::observer_ptr<osg::Camera> rttLeft, 
@@ -53,5 +53,6 @@ class OculusViewConfigOrientationCallback :  public osg::NodeCallback {
 		osg::observer_ptr<OculusHealthAndSafetyWarning> m_warning;
 		
 };
+#endif
 
 #endif /* _OSG_OCULUSVIEWCONFIG_H_ */

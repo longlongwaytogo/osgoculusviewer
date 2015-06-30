@@ -9,6 +9,52 @@
 #include "oculuseventhandler.h"
 
 
+struct SlaveUpdateCallback : public osg::View::Slave::UpdateSlaveCallback
+{
+	enum CameraType
+	{
+		LEFT_CAMERA,
+		RIGHT_CAMERA
+	};
+
+	SlaveUpdateCallback(CameraType cameraType, OculusDevice* device, OculusSwapCallback* swapCallback, OculusHealthAndSafetyWarning* warning):
+		m_cameraType(cameraType),
+		m_device(device),
+		m_swapCallback(swapCallback),
+		m_warning(warning) {}
+
+    virtual void updateSlave(osg::View& view, osg::View::Slave& slave)
+	{
+		if (m_cameraType==LEFT_CAMERA)
+		{
+			m_device->updatePose(m_swapCallback->frameIndex());
+
+		}
+
+		osg::Vec3 position = m_device->position();
+		osg::Quat orientation = m_device->orientation();
+
+		osg::Matrix viewOffset = (m_cameraType==LEFT_CAMERA) ? m_device->viewMatrixLeft() : m_device->viewMatrixRight();
+
+		viewOffset.preMultRotate(orientation);
+		viewOffset.preMultTranslate(position);
+
+		slave._viewOffset = viewOffset;
+
+		slave.updateSlaveImplementation(view);
+
+		if (m_warning.valid()) {
+			m_warning.get()->updatePosition(view.getCamera()->getInverseViewMatrix(), position, orientation);
+		}
+	}
+
+	CameraType m_cameraType;
+	osg::ref_ptr<OculusDevice> m_device;
+	osg::ref_ptr<OculusSwapCallback> m_swapCallback;
+	osg::ref_ptr<OculusHealthAndSafetyWarning> m_warning;
+};
+
+
 /* Public functions */
 void OculusViewConfig::configure(osgViewer::View& view) const
 {
@@ -30,8 +76,8 @@ void OculusViewConfig::configure(osgViewer::View& view) const
 	osg::ref_ptr<osg::Camera> camera = view.getCamera();
 	camera->setName("Main");
 	// Disable scene rendering for main camera
-	camera->setCullMask(~m_sceneNodeMask);
-	camera->setGraphicsContext(gc);
+	//camera->setCullMask(~m_sceneNodeMask);
+	//camera->setGraphicsContext(gc);
 	// Use full view port
 	camera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
 	// Disable automatic computation of near and far plane on main camera, will propagate to slave cameras
@@ -85,10 +131,13 @@ void OculusViewConfig::configure(osgViewer::View& view) const
 		m_device->projectionOffsetMatrixLeft(),
 		m_device->viewMatrixLeft(), 
 		true);
+	view.getSlave(0)._updateSlaveCallback = new SlaveUpdateCallback(SlaveUpdateCallback::LEFT_CAMERA, m_device.get(), swapCallback.get(), m_warning.get());
+
 	view.addSlave(cameraRTTRight, 
 		m_device->projectionOffsetMatrixRight(),
 		m_device->viewMatrixRight(),
 		true);
+	view.getSlave(1)._updateSlaveCallback = new SlaveUpdateCallback(SlaveUpdateCallback::RIGHT_CAMERA, m_device.get(), swapCallback.get(), 0);
 
 	// Use sky light instead of headlight to avoid light changes when head movements
 	view.setLightingMode(osg::View::SKY_LIGHT);
@@ -98,15 +147,15 @@ void OculusViewConfig::configure(osgViewer::View& view) const
 	view.setName("Oculus");
 
 	// Connect main camera to node callback that get HMD orientation
-	camera->setDataVariance(osg::Object::DYNAMIC);
-	camera->setCullCallback(new OculusViewConfigOrientationCallback(cameraRTTLeft, cameraRTTRight, m_device, swapCallback, m_warning));
+	//camera->setDataVariance(osg::Object::DYNAMIC);
+	//camera->setCullCallback(new OculusViewConfigOrientationCallback(cameraRTTLeft, cameraRTTRight, m_device, swapCallback, m_warning));
 	
 	// Add Oculus keyboard handler
 	view.addEventHandler(new OculusEventHandler(m_device));
 	view.addEventHandler(new OculusWarningEventHandler(m_device, m_warning));
 }
 
-
+#if 0
 /* Callbacks */
 void OculusViewConfigOrientationCallback::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
@@ -135,4 +184,4 @@ void OculusViewConfigOrientationCallback::operator() (osg::Node* node, osg::Node
 
 	traverse(node, nv);
 }
-
+#endif
