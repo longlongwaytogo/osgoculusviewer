@@ -76,7 +76,6 @@ void OculusViewConfig::configure(osgViewer::View& view) const
 	osg::ref_ptr<osg::Camera> camera = view.getCamera();
 	camera->setName("Main");
 	// Disable scene rendering for main camera
-	//camera->setCullMask(~m_sceneNodeMask);
 	//camera->setGraphicsContext(gc);
 	// Use full view port
 	camera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
@@ -98,8 +97,6 @@ void OculusViewConfig::configure(osgViewer::View& view) const
 	osg::ref_ptr<osg::Camera> cameraRTTRight = m_device->createRTTCamera(textureRight, OculusDevice::RIGHT, osg::Camera::RELATIVE_RF, gc);
 	cameraRTTLeft->setName("LeftRTT");
 	cameraRTTRight->setName("RightRTT");
-	//cameraRTTLeft->setCullMask(m_sceneNodeMask);
-	//cameraRTTRight->setCullMask(m_sceneNodeMask);
 	
 	// Create warp ortho camera
 	osg::ref_ptr<osg::Camera> cameraWarp = m_device->createWarpOrthoCamera(0.0, 1.0, 0.0, 1.0, gc);
